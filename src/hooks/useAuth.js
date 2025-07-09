@@ -1,6 +1,35 @@
-import { useState } from 'react';
+import { createContext, useContext, useState } from 'react';
+import {
+  loginWithEmail,
+  logout as firebaseLogout,
+  registerPlanningUser,
+} from '../services/auth';
 
-export function useAuth() {
-    const [user, setUser] = useState(null);
-    return { user, setUser };
-} 
+const AuthContext = createContext(null);
+
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+
+  const login = async (email, password, role) => {
+    await loginWithEmail(email, password);
+    setUser({ type: role, data: { email } });
+  };
+
+  const register = async (email, password) => {
+    await registerPlanningUser(email, password);
+    setUser({ type: 'planning', data: { email } });
+  };
+
+  const logout = async () => {
+    await firebaseLogout();
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, login, register, logout, setUser }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => useContext(AuthContext);

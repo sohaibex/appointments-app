@@ -1,89 +1,102 @@
 import React, { useState } from 'react';
-import HomePage from './pages/HomePage';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import {
+  HomePage,
+  NotFound,
+  PortalLogin,
+  PlanningRegister,
+} from './pages';
 import ClientLogin from './components/client/ClientLogin';
 import ClientDashboard from './components/client/ClientDashboard';
 import PlanningDashboard from './components/planning/PlanningDashboard';
 import AdminDashboard from './components/admin/AdminDashboard';
+import ManualEntry from './components/planning/ManualEntry';
 import NotificationToast from './components/common/NotificationToast';
+import ProtectedRoute from './components/common/ProtectedRoute';
+import { AuthProvider, useAuth } from './hooks/useAuth';
 
-function App() {
-  const [currentView, setCurrentView] = useState('home');
-  const [currentUser, setCurrentUser] = useState(null);
+const AppRoutes = () => {
+  const { user, setUser, logout } = useAuth();
   const [notification, setNotification] = useState(null);
-  
+
   const handleClientLogin = (client) => {
-    setCurrentUser({ type: 'client', data: client });
-    setCurrentView('clientDashboard');
+    setUser({ type: 'client', data: client });
   };
-  
-  const handlePlanningLogin = () => {
-    setCurrentUser({ type: 'planning', data: { email: 'planning@example.com' } });
-    setCurrentView('planningDashboard');
-  };
-  
-  const handleAdminLogin = () => {
-    setCurrentUser({ type: 'admin', data: { email: 'admin@example.com' } });
-    setCurrentView('adminDashboard');
-  };
-  
-  const handleLogout = () => {
-    setCurrentUser(null);
-    setCurrentView('home');
-  };
-  
+
   const handleModifyAppointment = (clientId, date, creneau) => {
     setNotification({
       type: 'success',
-      message: 'Votre rendez-vous a été modifié avec succès !'
+      message: 'Votre rendez-vous a été modifié avec succès !',
     });
-    
-    if (currentUser?.data) {
-      setCurrentUser({
-        ...currentUser,
+
+    if (user?.data) {
+      setUser({
+        ...user,
         data: {
-          ...currentUser.data,
-          rdv: {
-            date: date,
-            creneau: creneau,
-            statut: 'modifie'
-          }
-        }
+          ...user.data,
+          rdv: { date, creneau, statut: 'modifie' },
+        },
       });
     }
-    
+
     setTimeout(() => setNotification(null), 5000);
   };
-  
-  const handleNavigate = (view) => {
-    if (view === 'planningLogin') {
-      handlePlanningLogin();
-    } else if (view === 'adminLogin') {
-      handleAdminLogin();
-    } else {
-      setCurrentView(view);
-    }
+
+  const handleLogout = () => {
+    logout();
   };
-  
+
   return (
     <>
-      {currentView === 'home' && <HomePage onNavigate={handleNavigate} />}
-      {currentView === 'clientLogin' && <ClientLogin onLogin={handleClientLogin} />}
-      {currentView === 'clientDashboard' && currentUser?.data && (
-        <ClientDashboard 
-          client={currentUser.data} 
-          onModifyAppointment={handleModifyAppointment}
-          onLogout={handleLogout}
-        />
-      )}
-      {currentView === 'planningDashboard' && (
-        <PlanningDashboard onLogout={handleLogout} />
-      )}
-      {currentView === 'adminDashboard' && (
-        <AdminDashboard onLogout={handleLogout} />
-      )}
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/client" element={<ClientLogin onLogin={handleClientLogin} />} />
+        <Route element={<ProtectedRoute roles={['client']} />}>
+          <Route
+            path="/client/dashboard"
+            element={
+              <ClientDashboard
+                client={user?.data}
+                onModifyAppointment={handleModifyAppointment}
+                onLogout={handleLogout}
+              />
+            }
+          />
+        </Route>
+
+        <Route path="/portal/login" element={<PortalLogin />} />
+        <Route path="/portal/register" element={<PlanningRegister />} />
+        <Route element={<ProtectedRoute roles={['planning', 'admin']} />}>
+          <Route
+            path="/portal"
+            element={
+              user?.type === 'admin' ? (
+                <AdminDashboard onLogout={handleLogout} />
+              ) : (
+                <PlanningDashboard onLogout={handleLogout} />
+              )
+            }
+          />
+          <Route
+            path="/portal/registry"
+            element={<ManualEntry onSave={() => {}} onCancel={() => {}} />}
+          />
+        </Route>
+
+        <Route path="*" element={<NotFound />} />
+      </Routes>
       <NotificationToast notification={notification} />
     </>
   );
-}
+};
 
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <AppRoutes />
+      </Router>
+    </AuthProvider>
+  );
+}
 export default App;
