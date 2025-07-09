@@ -15,9 +15,9 @@ export const AuthProvider = ({ children }) => {
     setUser({ type: role, data: { email } });
   };
 
-  const register = async (email, password) => {
-    await registerPlanningUser(email, password);
-    setUser({ type: 'planning', data: { email } });
+  const register = async (email, password, fullName, phone) => {
+    await registerPlanningUser(email, password, fullName, phone);
+    setUser({ type: 'planning', data: { email, fullName, phone } });
   };
 
   const logout = async () => {
