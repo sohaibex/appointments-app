@@ -1,8 +1,10 @@
 import React from 'react';
 import { Calendar, User, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../components/common/Header';
 
-const HomePage = ({ onNavigate }) => {
+const HomePage = () => {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <Header userType={null} />
@@ -29,7 +31,7 @@ const HomePage = ({ onNavigate }) => {
                 Consultez et modifiez votre rdv avec votre ID client ou QR code
               </p>
               <button
-                onClick={() => onNavigate('clientLogin')}
+                onClick={() => navigate('/client')}
                 className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
               >
                 Accéder
@@ -48,7 +50,7 @@ const HomePage = ({ onNavigate }) => {
                 Gérez les rendez-vous et importez les données clients
               </p>
               <button
-                onClick={() => onNavigate('planningLogin')}
+                onClick={() => navigate('/portal/login')}
                 className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition"
               >
                 Connexion
@@ -67,7 +69,7 @@ const HomePage = ({ onNavigate }) => {
                 Administration globale et validation des comptes
               </p>
               <button
-                onClick={() => onNavigate('adminLogin')}
+                onClick={() => navigate('/portal/login')}
                 className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition"
               >
                 Connexion
