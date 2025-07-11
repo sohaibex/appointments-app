@@ -9,7 +9,6 @@ const PlanningRegister = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
-  const [phone, setPhone] = useState('');
   const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
@@ -19,7 +18,7 @@ const PlanningRegister = () => {
       return;
     }
     try {
-      await register(email, password, fullName, phone);
+      await register(email, password, fullName);
       navigate('/portal');
     } catch (err) {
       setError("Erreur lors de l'inscription");
@@ -43,15 +42,7 @@ const PlanningRegister = () => {
             required
           />
         </div>
-        <div>
-          <label className="block text-sm mb-1">Téléphone</label>
-          <input
-            type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            className="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-indigo-400"
-          />
-        </div>
+      
         <div>
           <label className="block text-sm mb-1">Email</label>
           <input
