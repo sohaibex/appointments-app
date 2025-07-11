@@ -6,6 +6,10 @@ const ProtectedRoute = ({ roles }) => {
   const { user } = useAuth();
 
   if (!user) {
+    // Redirect clients to client login, others to portal login
+    if (roles && roles.includes('client')) {
+      return <Navigate to="/client" replace />;
+    }
     return <Navigate to="/portal/login" replace />;
   }
 
