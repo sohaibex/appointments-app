@@ -2,10 +2,12 @@ import express from 'express';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
-import { initializeApp, applicationDefault, cert } from 'firebase-admin/app';
+import { initializeApp, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
 import appointmentsRouter from './routes/appointments.js';
 import clientsRouter from './routes/clients.js';
+import authRouter from './routes/auth.js';
 import { readFileSync } from 'fs';
 
 const app = express();
@@ -20,6 +22,7 @@ if (serviceAccountPath) {
   initializeApp();
 }
 export const db = getFirestore();
+export const adminAuth = getAuth();
 
 // Swagger setup
 const swaggerDefinition = {
@@ -37,6 +40,7 @@ const swaggerSpec = swaggerJsdoc(options);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // API routes
+app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/appointments', appointmentsRouter);
 app.use('/api/v1/clients', clientsRouter);
 

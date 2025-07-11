@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { db } from '../index.js';
-import { collection, addDoc, getDocs, query, where } from 'firebase-admin/firestore';
+import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from 'firebase-admin/firestore';
 
 const router = Router();
 
@@ -14,8 +14,59 @@ const router = Router();
 router.post('/', async (req, res) => {
   try {
     const data = req.body;
-    const doc = await addDoc(collection(db, 'appointments'), data);
-    res.status(201).json({ id: doc.id });
+    const docRef = await addDoc(collection(db, 'appointments'), data);
+    res.status(201).json({ id: docRef.id });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+/**
+ * @swagger
+ * /appointments:
+ *   get:
+ *     summary: List all appointments
+ *     tags: [Appointments]
+ */
+router.get('/', async (req, res) => {
+  try {
+    const snapshot = await getDocs(collection(db, 'appointments'));
+    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    res.json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+/**
+ * @swagger
+ * /appointments/{id}:
+ *   put:
+ *     summary: Update an appointment
+ *     tags: [Appointments]
+ */
+router.put('/:id', async (req, res) => {
+  try {
+    const docRef = doc(db, 'appointments', req.params.id);
+    await updateDoc(docRef, req.body);
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+/**
+ * @swagger
+ * /appointments/{id}:
+ *   delete:
+ *     summary: Delete an appointment
+ *     tags: [Appointments]
+ */
+router.delete('/:id', async (req, res) => {
+  try {
+    const docRef = doc(db, 'appointments', req.params.id);
+    await deleteDoc(docRef);
+    res.json({ success: true });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

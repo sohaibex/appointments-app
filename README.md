@@ -23,8 +23,18 @@ This repository now includes a minimal Express backend located in the `server` f
    npm install
    ```
 2. Provide Firebase service account credentials via the `FIREBASE_SERVICE_ACCOUNT` environment variable pointing to a JSON file.
+   The Firebase API key must also be provided via `FIREBASE_API_KEY` for authentication endpoints.
 3. Start the server:
    ```bash
    npm start
    ```
 4. Swagger UI will be available at `http://localhost:5000/api-docs`.
+
+### API overview
+
+The backend exposes the following main endpoints:
+
+- `POST /api/v1/auth/login` – authenticate a planning or admin user
+- `POST /api/v1/auth/register` – create a new planning user
+- CRUD operations under `/api/v1/appointments`
+- Client management endpoints under `/api/v1/clients`
